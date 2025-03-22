@@ -87,6 +87,7 @@ async fn process(
     stream: TcpStream,
     addr: SocketAddr,
 ) -> Result<(),Box<dyn Error>> {
-    let mut lines = Framed::new(inner, codec)
+    let mut lines = Framed::new(inner, codec);
+    lines.send("Please enter your username:").await?;
 
 }
