@@ -89,5 +89,8 @@ async fn process(
 ) -> Result<(),Box<dyn Error>> {
     let mut lines = Framed::new(inner, codec);
     lines.send("Please enter your username:").await?;
+    let username = match lines.next().await {
+        
+    }
 
 }
