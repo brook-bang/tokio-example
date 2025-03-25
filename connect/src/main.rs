@@ -34,6 +34,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     if tcp {
         tcp::connect(&addr, stdin, stdout).await?;
     } else {
+        udp::connect(&addr, stdin, stdout).await?;
     }
     Ok(())
 }
@@ -80,6 +81,22 @@ mod udp {
     use std::net::SocketAddr;
     use tokio::net::UdpSocket;
 
+
+    pub async fn connect(
+        addr: &SocketAddr,
+        stdin: impl Stream<Item = Result<Bytes,io::Error>> + Unpin,
+        stdout: impl Sink<Bytes,Error = io::Error> + Unpin,
+    ) -> Result<(), Box<dyn Error>> {
+        let bind_addr = if addr.ip().is_ipv4() {
+            "0.0.0.0:0"
+        } else {
+            "[::]:0"
+        };
+        let socket = UdpSocket::bind(&bind_addr).await?;
+        socket.connect(addr).await?;
+        tokio::try_join!(send(stdin,&socket),recv(stdout,&socket))?;
+        Ok(())
+    }
     
 
     async fn send(
